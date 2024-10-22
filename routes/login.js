@@ -28,6 +28,7 @@ router.post("/login", async (req, res) => {
     }
 
     user = rows[0];
+    console.log("login.js line 31:", user.id);
 
     // Compare the provided password with the stored hashed password
     // const passwordMatch = bcrypt.compareSync(password, user.password);

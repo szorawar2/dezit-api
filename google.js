@@ -6,6 +6,7 @@ import mime from "mime-types";
 import pool from "./db.js";
 
 let ACCESS_TOKEN = "";
+let REFRESH_TOKEN = "";
 
 const oauth2Client = new google.auth.OAuth2(
   process.env.CLIENT_ID,
@@ -44,16 +45,19 @@ async function googleUploadFile(
   fileName,
   mimeType
 ) {
-  const [dbResult] = await pool.query(
+  const [dbResultA] = await pool.query(
     "SELECT acc_token FROM accesstoken WHERE id = 1"
   );
-  //console.log("current token:", dbResult.rows[0].acc_token);
+  ACCESS_TOKEN = dbResultA[0].acc_token;
 
-  ACCESS_TOKEN = dbResult[0].acc_token;
+  const [dbResultB] = await pool.query(
+    "SELECT acc_token FROM accesstoken WHERE id = 2"
+  );
+  REFRESH_TOKEN = dbResultB[0].acc_token;
 
   oauth2Client.setCredentials({
     access_token: ACCESS_TOKEN,
-    refresh_token: process.env.REFRESH_TOKEN,
+    refresh_token: REFRESH_TOKEN,
   });
 
   try {
@@ -86,15 +90,19 @@ async function googleUploadFile(
 async function googleDownloadFile(fileId, res) {
   // const destPath = path.join("..", "downloads", "downloaded_file.txt");
 
-  const [dbResult] = await pool.query(
+  const [dbResultA] = await pool.query(
     "SELECT acc_token FROM accesstoken WHERE id = 1"
   );
+  ACCESS_TOKEN = dbResultA[0].acc_token;
 
-  ACCESS_TOKEN = dbResult[0].acc_token;
+  const [dbResultB] = await pool.query(
+    "SELECT acc_token FROM accesstoken WHERE id = 2"
+  );
+  REFRESH_TOKEN = dbResultB[0].acc_token;
 
   oauth2Client.setCredentials({
     access_token: ACCESS_TOKEN,
-    refresh_token: process.env.REFRESH_TOKEN,
+    refresh_token: REFRESH_TOKEN,
   });
 
   try {
