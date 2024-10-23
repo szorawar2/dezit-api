@@ -42,7 +42,7 @@ router.post("/signup", async (req, res) => {
 
   try {
     const [result] = await pool.query(
-      "SELECT * FROM userbase WHERE username = $1",
+      "SELECT * FROM userbase WHERE username = ?",
       [username]
     );
     userID = result[0].id;
