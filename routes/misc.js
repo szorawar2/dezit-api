@@ -8,4 +8,8 @@ router.get("/users", async (req, res) => {
   res.send("Why you trying to hack my database :(");
 });
 
+router.get("/test", async (reqq, res) => {
+  res.send("Auto deploy test");
+});
+
 export default router;
