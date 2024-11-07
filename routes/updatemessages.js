@@ -5,12 +5,12 @@ import pool from "../db.js";
 const router = express.Router();
 
 router.post("/updatemessages", async (req, res) => {
-  const { id, message_text, file_text, file_driveId } = req.body;
+  const { id, message_text, file_text, file_fileId } = req.body;
 
   try {
     await pool.query(
       "INSERT INTO userdata (user_id, item_message, item_filename, item_fileid) VALUES (?, ?, ?, ?)",
-      [id, message_text, file_text, file_driveId]
+      [id, message_text, file_text, file_fileId]
     );
     console.log("Message updated");
     res.json({ message: "Insert complete" });

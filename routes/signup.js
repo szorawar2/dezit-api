@@ -2,6 +2,7 @@ import express from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 
+import { s3CreateFolder } from "../s3.js";
 import pool from "../db.js";
 
 const router = express.Router();
@@ -12,8 +13,8 @@ router.post("/signup", async (req, res) => {
   const { username, password } = req.body;
   let userID;
 
+  //Check if user exists
   try {
-    // Query the database to find the user by ID
     const [rows] = await pool.query(
       "SELECT * FROM userbase WHERE username = ?",
       [username]
@@ -27,19 +28,25 @@ router.post("/signup", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 
+  //Password must be atleast 8 characters long and must not include space
   if (password.length < 8 || password.includes(" ")) {
     return res.json({ error: 2, message: "Enter a valid password" });
   }
 
+  //Add new user to userbase table in database
   try {
     await pool.query(
       "INSERT INTO userbase (username, password) VALUES (?, ?)",
       [username, password]
     );
+
+    //Create user data folder on s3 storage
+    s3CreateFolder(username);
   } catch (error) {
     console.log(error);
   }
 
+  //Send response with the user data
   try {
     const [result] = await pool.query(
       "SELECT * FROM userbase WHERE username = ?",

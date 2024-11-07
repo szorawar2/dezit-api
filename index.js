@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
 
+//Import routes
 import loginRouter from "./routes/login.js";
 import updMessRouter from "./routes/updatemessages.js";
 import uploadRouter from "./routes/upload.js";
@@ -10,7 +11,9 @@ import loadFileRouter from "./routes/load_file.js";
 import miscRouter from "./routes/misc.js";
 import signupRouter from "./routes/signup.js";
 
-const uploadPath = "../uploads/";
+// Load environment variables from .env file
+import dotenv from "dotenv";
+dotenv.config();
 
 const app = express();
 const PORT = process.env.SERVER || 5000;
