@@ -10,6 +10,7 @@ import uploadRouter from "./routes/upload.js";
 import loadFileRouter from "./routes/load_file.js";
 import miscRouter from "./routes/misc.js";
 import signupRouter from "./routes/signup.js";
+import loadChatsRouter from "./routes/load_chats.js";
 
 // Load environment variables from .env file
 import dotenv from "dotenv";
@@ -26,6 +27,7 @@ app.use(express.urlencoded({ extended: true })); // Middleware to parse URL-enco
 app.use(
   loginRouter, // (/login)
   signupRouter, // (/signup)
+  loadChatsRouter, //(/load_chats)
   updMessRouter, // (/updatemessages)
   uploadRouter, // (/upload, /upload_id)
   loadFileRouter, // (/load_file)

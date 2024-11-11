@@ -27,14 +27,9 @@ router.post("/login", async (req, res) => {
       });
     }
 
+    //Fetched user
     user = rows[0];
 
-    // Compare the provided password with the stored hashed password
-    // const passwordMatch = bcrypt.compareSync(password, user.password);
-
-    // if (!passwordMatch) {
-    //   return res.status(401).json({ message: "Invalid password" });
-    // }
     if (password !== user.password) {
       return res.json({
         error: 2,
@@ -51,35 +46,39 @@ router.post("/login", async (req, res) => {
     res.status(500).json({ status: "Server error" });
   }
 
-  try {
-    const [messages] = await pool.query(
-      "SELECT * FROM userdata WHERE user_id = ?",
-      [user.id]
-    );
+  res.json({
+    error: 0,
+    status: "Login successful",
+    id: user.id,
+    token,
+  });
 
-    let messagesArr = [];
-    messages.forEach((row, index) => {
-      // console.log(row.item_fileid);
-      const messageObj = {
-        text: row.item_message,
-        fileItem: {
-          fileName: row.item_filename,
-          fileId: row.item_fileid,
-        },
-      };
-      messagesArr.push(messageObj);
-    });
+  // try {
+  //   const [messages] = await pool.query("SELECT * FROM ?? ", [username]);
 
-    // Send success response
-    res.json({
-      status: "Login successful",
-      messagesData: messagesArr,
-      id: user.id,
-      token,
-    });
-  } catch (error) {
-    console.log(error);
-  }
+  //   let messagesArr = [];
+  //   messages.forEach((row, index) => {
+  //     // console.log(row.item_fileid);
+  //     const messageObj = {
+  //       text: row.message,
+  //       fileItem: {
+  //         fileName: row.file_name,
+  //         fileId: row.file_id,
+  //       },
+  //     };
+  //     messagesArr.push(messageObj);
+  //   });
+
+  //   // Send success response
+  //   res.json({
+  //     status: "Login successful",
+  //     messagesData: messagesArr,
+  //     id: user.id,
+  //     token,
+  //   });
+  // } catch (error) {
+  //   console.log(error);
+  // }
 });
 
 export default router;

@@ -1,22 +1,21 @@
-// const AWS = require('aws-sdk');
-// const fs = require('fs');
-// const path = require('path');
-
 import AWS from "aws-sdk";
 import {
   S3Client,
   GetObjectCommand,
   PutObjectCommand,
+  ListObjectsV2Command,
+  DeleteObjectsCommand,
 } from "@aws-sdk/client-s3";
-import fs from "fs";
 import path from "path";
-
 import dotenv from "dotenv";
 
 // Load environment variables from .env file
 dotenv.config();
 
-// Configure AWS with credentials
+/**
+ * Configures AWS SDK credentials using environment variables.
+ * Access key and secret access key are pulled from `.env` file.
+ */
 AWS.config.update({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
@@ -25,11 +24,18 @@ AWS.config.update({
 
 const s3 = new AWS.S3();
 
-// Updated s3UploadFile to accept file stream, filename, and path information
+/**
+ * Uploads a file to an AWS S3 bucket.
+ *
+ * @param {ReadableStream} fileStream - The file stream to upload.
+ * @param {string} filename - The name/id of the file to be saved in S3.
+ * @param {string} directoryPath - User directory inside the S3 bucket where the file will be saved.
+ * @returns {Promise<string>} Resolves with the file's S3 URL if upload is successful.
+ */
 function s3UploadFile(fileStream, filename, directoryPath) {
   const params = {
     Bucket: "dezit-storage",
-    Key: `base/udat/${directoryPath}/${filename}`, // Customize directory path as needed
+    Key: `base/udat/${directoryPath}/${filename}`, // base/udat/user-directory/unique-filename
     Body: fileStream,
   };
 
@@ -54,6 +60,14 @@ const s3Client = new S3Client({
   },
 });
 
+/**
+ * Downloads a file from an AWS S3 bucket and streams it to the response.
+ *
+ * @param {string} userName - The username for structuring the file path.
+ * @param {string} fileId - The unique name of the file to download.
+ * @param {Object} res - The HTTP response object for piping the download.
+ * @returns {Promise<void>} Resolves when the download is complete.
+ */
 async function s3DownloadFile(userName, fileId, res) {
   const params = {
     Bucket: "dezit-storage",
@@ -85,20 +99,61 @@ async function s3DownloadFile(userName, fileId, res) {
   }
 }
 
-//Creates data path fo user at the time of signup
-async function s3CreateFolder(folderPath) {
+/**
+ * Creates a folder in the specified path within an S3 bucket.
+ * Useful for setting up user directories.
+ *
+ * @param {string} folderName - The folder named according to the username.
+ * @returns {Promise<void>} Resolves when the folder is successfully created.
+ */
+async function s3CreateFolder(folderName) {
   const params = {
     Bucket: "dezit-storage",
-    Key: `base/udat/${folderPath}/`, // Folder path with trailing slash
+    Key: `base/udat/${folderName}/`, // Folder path with trailing slash
     Body: "", // Empty content to create a zero-byte object
   };
 
   try {
     await s3Client.send(new PutObjectCommand(params));
-    console.log(`Folder ${folderPath} created successfully in S3.`);
+    console.log(`Folder ${folderName} created successfully in S3.`);
   } catch (err) {
     console.error("Error creating folder:", err);
   }
 }
 
-export { s3UploadFile, s3DownloadFile, s3CreateFolder };
+async function deleteFolder(folderPath) {
+  const listParams = {
+    Bucket: "dezit-storage",
+    Prefix: folderPath, // The folder path, e.g., "base/super/"
+  };
+
+  try {
+    // 1. List all objects with the specified prefix
+    const listedObjects = await s3Client.send(
+      new ListObjectsV2Command(listParams)
+    );
+
+    if (!listedObjects.Contents || listedObjects.Contents.length === 0) {
+      console.log("Folder is already empty or does not exist.");
+      return;
+    }
+
+    // 2. Create a batch of delete requests
+    const deleteParams = {
+      Bucket: "dezit-storage",
+      Delete: { Objects: [] },
+    };
+
+    listedObjects.Contents.forEach(({ Key }) => {
+      deleteParams.Delete.Objects.push({ Key });
+    });
+
+    // 3. Delete all objects in the folder
+    await s3Client.send(new DeleteObjectsCommand(deleteParams));
+    console.log(`Folder '${folderPath}' deleted successfully.`);
+  } catch (err) {
+    console.error("Error deleting folder:", err);
+  }
+}
+
+export { s3UploadFile, s3DownloadFile, s3CreateFolder, deleteFolder };

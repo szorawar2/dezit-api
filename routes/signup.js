@@ -9,6 +9,26 @@ const router = express.Router();
 
 const SECRET_KEY = "your_secret_key"; // Define your secret key here
 
+const createUserTable = async (connection, userName) => {
+  const createTableQuery = `
+    CREATE TABLE IF NOT EXISTS ?? (
+      id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+      chat_number INT,
+      message VARCHAR(3000),
+      file_name VARCHAR(1000),
+      file_id VARCHAR(1020),
+      time_of_message TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+  `;
+
+  try {
+    await connection.query(createTableQuery, [userName]);
+    console.log(`Table ${userName} created successfully.`);
+  } catch (error) {
+    console.error("Error creating table:", error);
+  }
+};
+
 router.post("/signup", async (req, res) => {
   const { username, password } = req.body;
   let userID;
@@ -46,6 +66,9 @@ router.post("/signup", async (req, res) => {
     console.log(error);
   }
 
+  // Create new table for user
+  await createUserTable(pool, username);
+
   //Send response with the user data
   try {
     const [result] = await pool.query(
@@ -53,7 +76,6 @@ router.post("/signup", async (req, res) => {
       [username]
     );
     userID = result[0].id;
-    //console.log(result.rows[0].id);
 
     // Generate JWT token
     const token = jwt.sign({ username }, SECRET_KEY, { expiresIn: "1h" });

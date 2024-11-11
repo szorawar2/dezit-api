@@ -3,7 +3,7 @@ import path from "path";
 import fs from "fs";
 import mime from "mime-types";
 
-import pool from "./db.js";
+import pool from "../db.js";
 
 let ACCESS_TOKEN = "";
 let REFRESH_TOKEN = "";
