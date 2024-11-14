@@ -20,8 +20,4 @@ router.post("/updatemessages", async (req, res) => {
   }
 });
 
-// router.get("/updatemessages", async (req, res) => {
-//   res.json({ Bruh: "yo" });
-// });
-
 export default router;

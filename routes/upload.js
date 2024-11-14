@@ -1,9 +1,6 @@
 import express from "express";
 import busboy from "busboy";
-import fs from "fs";
-import path from "path";
 
-import pool from "../db.js";
 import { s3UploadFile } from "../s3.js";
 
 const router = express.Router();
@@ -17,20 +14,6 @@ router.post("/upload_id", async (req, res) => {
   userId = req.body.userID;
   messageIndex = req.body.message_index;
   userName = req.body.userName;
-
-  // //Get username from userID
-  // try {
-  //   const [rows] = await pool.query("SELECT * FROM userbase WHERE id = ?", [
-  //     userId,
-  //   ]);
-  //   if (rows.length == 0) {
-  //     return res.json("unexpected error");
-  //   }
-  //   userName = rows[0].username;
-  // } catch (err) {
-  //   console.error(err);
-  //   res.status(500).json({ message: "Server error" });
-  // }
 
   res.status(200).json({ message: "upload_id updated" });
 });

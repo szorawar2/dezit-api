@@ -30,6 +30,7 @@ router.post("/login", async (req, res) => {
     //Fetched user
     user = rows[0];
 
+    //Wrong password
     if (password !== user.password) {
       return res.json({
         error: 2,
@@ -39,46 +40,18 @@ router.post("/login", async (req, res) => {
 
     // Generate JWT token
     token = jwt.sign({ username }, SECRET_KEY, { expiresIn: "1h" });
-
-    // return res.json({ token });
   } catch (err) {
     console.error(err);
     res.status(500).json({ status: "Server error" });
   }
 
+  // return user id & token;
   res.json({
     error: 0,
     status: "Login successful",
     id: user.id,
     token,
   });
-
-  // try {
-  //   const [messages] = await pool.query("SELECT * FROM ?? ", [username]);
-
-  //   let messagesArr = [];
-  //   messages.forEach((row, index) => {
-  //     // console.log(row.item_fileid);
-  //     const messageObj = {
-  //       text: row.message,
-  //       fileItem: {
-  //         fileName: row.file_name,
-  //         fileId: row.file_id,
-  //       },
-  //     };
-  //     messagesArr.push(messageObj);
-  //   });
-
-  //   // Send success response
-  //   res.json({
-  //     status: "Login successful",
-  //     messagesData: messagesArr,
-  //     id: user.id,
-  //     token,
-  //   });
-  // } catch (error) {
-  //   console.log(error);
-  // }
 });
 
 export default router;
