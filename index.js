@@ -11,6 +11,7 @@ import loadFileRouter from "./routes/load_file.js";
 import miscRouter from "./routes/misc.js";
 import signupRouter from "./routes/signup.js";
 import loadChatsRouter from "./routes/load_chats.js";
+import deleteMessageRouter from "./routes/delete_message.js";
 
 // Load environment variables from .env file
 import dotenv from "dotenv";
@@ -29,6 +30,7 @@ app.use(
   signupRouter, // (/signup)
   loadChatsRouter, //(/load_chats)
   updMessRouter, // (/updatemessages)
+  deleteMessageRouter, //(/delete_messages)
   uploadRouter, // (/upload, /upload_id)
   loadFileRouter, // (/load_file)
   miscRouter // (/users)

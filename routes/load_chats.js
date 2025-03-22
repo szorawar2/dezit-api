@@ -14,6 +14,7 @@ router.post("/load_chats", async (req, res) => {
       let messagesArr = [];
       messages.forEach((row, index) => {
         const messageObj = {
+          id: row.id,
           text: row.message,
           fileItem: {
             fileName: row.file_name,

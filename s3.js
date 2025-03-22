@@ -3,6 +3,7 @@ import {
   S3Client,
   GetObjectCommand,
   PutObjectCommand,
+  DeleteObjectCommand,
   ListObjectsV2Command,
   DeleteObjectsCommand,
 } from "@aws-sdk/client-s3";
@@ -121,10 +122,30 @@ async function s3CreateFolder(folderName) {
   }
 }
 
+/*
+--
+*/
+async function deleteFile(filePath) {
+  const deleteParams = {
+    Bucket: "dezit-storage",
+    Key: `base/udat/${filePath}`,
+  };
+
+  try {
+    await s3Client.send(new DeleteObjectCommand(deleteParams));
+    console.log(`File '${filePath}' deleted successfully.`);
+  } catch (err) {
+    console.error("Error deleting file:", err);
+  }
+}
+
+/*
+--
+*/
 async function deleteFolder(folderPath) {
   const listParams = {
     Bucket: "dezit-storage",
-    Prefix: folderPath, // The folder path, e.g., "base/super/"
+    Prefix: folderPath,
   };
 
   try {
@@ -156,4 +177,10 @@ async function deleteFolder(folderPath) {
   }
 }
 
-export { s3UploadFile, s3DownloadFile, s3CreateFolder, deleteFolder };
+export {
+  s3UploadFile,
+  s3DownloadFile,
+  s3CreateFolder,
+  deleteFile,
+  deleteFolder,
+};
