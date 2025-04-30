@@ -14,21 +14,21 @@ router.post("/login", async (req, res) => {
   let token;
 
   try {
-    // Query the database to find the user by ID
-    const [rows] = await pool.query(
-      "SELECT * FROM userbase WHERE username = ?",
+    // Query the database to find the user by username
+    const result = await pool.query(
+      "SELECT * FROM userbase WHERE username = $1",
       [username]
     );
 
-    if (rows.length === 0) {
+    if (result.rows.length === 0) {
       return res.json({
         error: 1,
         status: "Invalid username and password combination",
       });
     }
 
-    //Fetched user
-    user = rows[0];
+    // Fetched user
+    user = result.rows[0];
 
     //Wrong password
     if (password !== user.password) {

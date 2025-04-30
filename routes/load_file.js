@@ -1,6 +1,6 @@
 import express from "express";
 
-import { s3DownloadFile } from "../s3.js";
+import { downloadFile } from "../fs.js";
 
 const router = express.Router();
 
@@ -13,8 +13,8 @@ router.get("/load_file", async (req, res) => {
     return res.status(400).json({ error: "File ID is required" });
   }
 
-  // Call the googleDownloadFile function and pass the response object
-  await s3DownloadFile(userName, fileId, res);
+  // Call the downloadFile function and pass the response object
+  await downloadFile(userName, fileId, res);
 });
 
 export default router;

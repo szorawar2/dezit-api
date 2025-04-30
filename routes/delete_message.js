@@ -1,6 +1,6 @@
 import express from "express";
 import pool from "../db.js";
-import { deleteFile } from "../s3.js";
+import { deleteFile } from "../fs.js"; // Updated import
 
 const router = express.Router();
 
@@ -8,21 +8,20 @@ router.delete("/delete_message", async (req, res) => {
   const { username, id } = req.body;
 
   try {
-    const [result] = await pool.query("SELECT * FROM ?? WHERE id = ?", [
-      username,
+    const result = await pool.query("SELECT * FROM messages WHERE id = $1", [
       id,
     ]);
 
-    if (result.length > 0) {
-      const filePath = `${username}/${result[0].file_id}`;
+    if (result.rows.length > 0) {
+      const filePath = `${username}/${result.rows[0].file_id}`;
       try {
-        // Delete file from S3 if file_id exists
-        if (result[0].file_id) {
+        // Delete file from storage if file_id exists
+        if (result.rows[0].file_id) {
           await deleteFile(filePath);
         }
 
         // Delete message from database
-        await pool.query("DELETE FROM ?? WHERE id = ?", [username, id]);
+        await pool.query("DELETE FROM messages WHERE id = $1", [id]);
 
         res.json({ error: 0, status: "Message deleted successfully" });
       } catch (error) {

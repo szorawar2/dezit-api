@@ -2,32 +2,32 @@ import express from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 
-import { s3CreateFolder } from "../s3.js";
+import { createFolder } from "../fs.js"; // Updated import
 import pool from "../db.js";
 
 const router = express.Router();
 
 const SECRET_KEY = "your_secret_key"; // Define your secret key here
 
-const createUserTable = async (connection, userName) => {
-  const createTableQuery = `
-    CREATE TABLE IF NOT EXISTS ?? (
-      id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-      chat_number INT,
-      message VARCHAR(3000),
-      file_name VARCHAR(1000),
-      file_id VARCHAR(1020),
-      time_of_message TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-  `;
+// const createUserTable = async (connection, userName) => {
+//   const createTableQuery = `
+//     CREATE TABLE IF NOT EXISTS ${userName} (
+//       id SERIAL PRIMARY KEY,
+//       chat_number INT,
+//       message VARCHAR(3000),
+//       file_name VARCHAR(1000),
+//       file_id VARCHAR(1020),
+//       time_of_message TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+//     );
+//   `;
 
-  try {
-    await connection.query(createTableQuery, [userName]);
-    console.log(`Table ${userName} created successfully.`);
-  } catch (error) {
-    console.error("Error creating table:", error);
-  }
-};
+//   try {
+//     await connection.query(createTableQuery);
+//     console.log(`Table ${userName} created successfully.`);
+//   } catch (error) {
+//     console.error("Error creating table:", error);
+//   }
+// };
 
 router.post("/signup", async (req, res) => {
   const { username, password } = req.body;
@@ -35,10 +35,11 @@ router.post("/signup", async (req, res) => {
 
   //Check if user exists
   try {
-    const [rows] = await pool.query(
-      "SELECT * FROM userbase WHERE username = ?",
+    const result = await pool.query(
+      "SELECT * FROM userbase WHERE username = $1",
       [username]
     );
+    const rows = result.rows;
 
     if (rows.length) {
       return res.json({ error: 1, message: "User already exists" });
@@ -56,26 +57,26 @@ router.post("/signup", async (req, res) => {
   //Add new user to userbase table in database
   try {
     await pool.query(
-      "INSERT INTO userbase (username, password) VALUES (?, ?)",
+      "INSERT INTO userbase (username, password) VALUES ($1, $2)",
       [username, password]
     );
 
-    //Create user data folder on s3 storage
-    s3CreateFolder(username);
+    // Create user data folder in local storage
+    createFolder(username);
   } catch (error) {
     console.log(error);
   }
 
   // Create new table for user
-  await createUserTable(pool, username);
+  // await createUserTable(pool, username);
 
   //Send response with the user data
   try {
-    const [result] = await pool.query(
-      "SELECT * FROM userbase WHERE username = ?",
+    const result = await pool.query(
+      "SELECT * FROM userbase WHERE username = $1",
       [username]
     );
-    userID = result[0].id;
+    userID = result.rows[0].id;
 
     // Generate JWT token
     const token = jwt.sign({ username }, SECRET_KEY, { expiresIn: "1h" });

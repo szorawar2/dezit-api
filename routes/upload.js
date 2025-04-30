@@ -1,7 +1,7 @@
 import express from "express";
 import busboy from "busboy";
 
-import { s3UploadFile } from "../s3.js";
+import { uploadFile } from "../fs.js"; // Updated import
 
 const router = express.Router();
 
@@ -22,18 +22,18 @@ router.post("/upload", async (req, res) => {
   const bb = busboy({ headers: req.headers });
 
   bb.on("file", async (fieldname, file, filename) => {
-    const s3_filename = `${userId}_${messageIndex}_${filename.filename}`;
+    const local_filename = `${userId}_${messageIndex}_${filename.filename}`;
 
-    console.log("Uploading:", s3_filename);
+    console.log("Uploading:", local_filename);
 
     try {
-      // Pass the file stream and filename to s3UploadFile
-      const result = await s3UploadFile(file, s3_filename, userName);
+      // Pass the file stream and filename to uploadFile
+      const result = await uploadFile(file, local_filename, userName);
 
-      console.log("S3 file URL:", result);
+      console.log("Local file path:", result);
       res
         .status(200)
-        .json({ message: "Upload complete", s3FileId: s3_filename });
+        .json({ message: "Upload complete", localFileId: local_filename });
     } catch (error) {
       console.error("Error uploading file:", error);
       res.status(500).json({ error: "Upload failed" });

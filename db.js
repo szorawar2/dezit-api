@@ -1,18 +1,17 @@
 /* For SQL */
 
-import mysql from "mysql2/promise";
+import { Pool } from "pg";
 import dotenv from "dotenv";
 
 // Load environment variables from .env file
 dotenv.config();
 
-// Create a pool for managing connections
-const pool = mysql.createPool({
-  user: process.env.DB_USER, // Database username
-  host: process.env.DB_HOST, // Database host (localhost if running locally)
-  database: process.env.DB_DATABASE, // Database name
-  password: process.env.DB_PASSWORD, // Database password
-  port: process.env.DB_PORT, // Default PostgreSQL port
+const pool = new Pool({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_DATABASE,
+  port: process.env.DB_PORT, // default PostgreSQL port
 });
 
 export default pool;
